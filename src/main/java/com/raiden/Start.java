@@ -37,6 +37,8 @@ public class Start {
             ZipUtils.writeZip(Arrays.asList(file), ZIP_PATH);
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            file.delete();
         }
     }
 }
