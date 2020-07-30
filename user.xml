@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<User>
+  <id>1</id>
+  <student>高三三班</student>
+  <hobby class="java.util.Arrays$ArrayList">
+    <a class="string-array">
+      <string>足球</string>
+      <string>篮球</string>
+    </a>
+  </hobby>
+</User>
