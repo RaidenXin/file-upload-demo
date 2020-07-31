@@ -20,7 +20,9 @@ public final class ZipUtils {
         byte[] buf = new byte[1024];
         int len;
         for (File file : files) {
-            if (!file.isFile()) continue;
+            if (file == null || !file.isFile()) {
+                continue;
+            }
             ZipEntry ze = new ZipEntry(file.getName());
             try {
                 zos.putNextEntry(ze);
@@ -28,10 +30,12 @@ public final class ZipUtils {
                 while ((len = bis.read(buf)) > 0) {
                     zos.write(buf, 0, len);
                 }
+                bis.close();
                 zos.closeEntry();
             }catch (IOException e){
                 continue;
             }
+            file.delete();
         }
         zos.close();
     }
