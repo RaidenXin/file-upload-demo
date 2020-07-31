@@ -8,9 +8,6 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * 除了静态解析方法，其余方法都有可能返回空
@@ -39,14 +36,7 @@ public final class LocalDateUtils {
 
     private static final String ZERO = "0";
 
-    private static final Map<String, Function<String, String>> FUNCTION_CACHE;
-
-    public static final String GET_TIME = "getTime";
-
-    static {
-        FUNCTION_CACHE = new HashMap<>();
-        FUNCTION_CACHE.put(GET_TIME, LocalDateUtils::getTime);
-    }
+    public static final String GET_TIME = "LocalDateUtils.getTime";
 
     private LocalDateUtils() {
     }
@@ -192,21 +182,13 @@ public final class LocalDateUtils {
     }
 
     public static String getTime(String date){
-        if (StringUtils.isBlank(date)){
+        if (StringUtils.isBlank((String)date)){
             return ZERO;
         }
-        Date time = parseDate(date);
+        Date time = parseDate((String) date);
         if (time == null){
             return ZERO;
         }
         return Long.toString(time.getTime() / 1000L);
-    }
-
-    public static String executeFunction(String functionName,String args){
-        Function<String, String> function = FUNCTION_CACHE.get(functionName);
-        if (function == null){
-            return null;
-        }
-        return function.apply(args);
     }
 }

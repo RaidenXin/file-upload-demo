@@ -2,6 +2,7 @@ package com.raiden.util;
 
 import com.raiden.annotation.XMLAttribute;
 import com.raiden.annotation.XMLNode;
+import com.raiden.content.DataConversionStrategyContent;
 import com.raiden.core.FieldInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -46,9 +47,9 @@ public final class XMLUtils {
         //添加根节点
         Element message = doc.addElement(MESSAGE);
         serialize(message, bean);
-        try {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter writer = new XMLWriter(new FileOutputStream(file), format);
+            XMLWriter writer = new XMLWriter(fileOutputStream, format);
             writer.write(doc);
             return file;
         }catch (IOException e){
@@ -86,7 +87,7 @@ public final class XMLUtils {
                 } catch (Exception e) {
                     continue;
                 }
-            }if (Collection.class.isAssignableFrom(type)){
+            }else if (Collection.class.isAssignableFrom(type)){
                 Method getFieldValue = info.getGetFieldValue();
                 //如果他是List 进行特殊操作
                 try {
@@ -105,7 +106,7 @@ public final class XMLUtils {
                 } catch (Exception e) {
                     continue;
                 }
-            }if (type.isArray()){
+            }else if (type.isArray()){
                 Method getFieldValue = info.getGetFieldValue();
                 //如果他是List 进行特殊操作
                 try {
@@ -134,7 +135,7 @@ public final class XMLUtils {
                         String functionName;
                         //如果是时间类 且 格式化方法名称不为空 进行格式化
                         if (isBlank && info.isDataConversion() && StringUtils.isNotBlank(functionName = info.getFunctionName())){
-                            item.addAttribute(xmlAttribute.key(), LocalDateUtils.executeFunction(functionName, attributeValue));
+                            item.addAttribute(xmlAttribute.key(), DataConversionStrategyContent.executeFunction(functionName, attributeValue));
                         }else {
                             item.addAttribute(xmlAttribute.key(), attributeValue);
                         }
