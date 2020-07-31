@@ -37,7 +37,7 @@ public class User {
             @XMLAttribute(key = "rmk", value = "班级")
     })
     private String student;
-    @XMLNode(nameOfTheNod = "ITEM5",
+    @XMLNode(nameOfTheNod = "ITEM5",isDataConversion = true,
             dateFormatFunction = LocalDateUtils.GET_TIME,
             attributes = {
             @XMLAttribute(key = "key", value = "BIRTHDAY"),

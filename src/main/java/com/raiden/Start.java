@@ -27,7 +27,7 @@ import java.util.function.Function;
  */
 public class Start {
 
-    private static final String ZIP_PATH = "C:\\Users\\xinlei002\\Desktop\\user";
+    private static final String ZIP_PATH = "C:\\Users\\Raiden\\Desktop\\user";
 
     @Test
     public void test(){
@@ -36,11 +36,10 @@ public class Start {
         user.setName("张三");
         user.setStudent("高三三班");
         user.setDateOfBirth("2015年1月1日");
+        File file = XMLUtils.serializeToXML(user);
         try {
-            File file = XMLUtils.serializeToXML(user);
             ZipUtils.writeZip(Arrays.asList(file), ZIP_PATH);
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

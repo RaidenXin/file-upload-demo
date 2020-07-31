@@ -28,8 +28,6 @@ public final class XMLUtils {
 
     private static final String MESSAGE = "MESSAGE";
 
-    private static final String NAME = "name";
-
     private static final String PATH = "user.xml";
 
     /**
@@ -46,9 +44,9 @@ public final class XMLUtils {
         //添加根节点
         Element message = doc.addElement(MESSAGE);
         serialize(message, bean);
-        try {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter writer = new XMLWriter(new FileOutputStream(file), format);
+            XMLWriter writer = new XMLWriter(fileOutputStream, format);
             writer.write(doc);
             return file;
         }catch (IOException e){

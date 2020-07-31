@@ -34,8 +34,9 @@ public final class ZipUtils {
                 zos.closeEntry();
             }catch (IOException e){
                 continue;
+            }finally {
+                file.delete();
             }
-            file.delete();
         }
         zos.close();
     }
