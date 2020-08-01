@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class FieldInfoUtils {
 
-    private static final Map<Class<?>, FieldInfo[]> cache = new HashMap<>();
+    private static final Map<Class<?>, FieldInfo[]> cache = new ConcurrentHashMap<>();
 
     private static final String GET = "get";
 
