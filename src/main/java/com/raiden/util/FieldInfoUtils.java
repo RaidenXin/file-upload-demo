@@ -5,15 +5,25 @@ import com.raiden.core.FieldInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class FieldInfoUtils {
 
+    private static final Map<Class<?>, FieldInfo[]> cache = new HashMap<>();
+
     private static final String GET = "get";
 
-    public static FieldInfo[] builder(Field... fields){
-        if (fields == null){
+    public static FieldInfo[] builder(Class<?> clazz){
+        if (clazz == null){
             return new FieldInfo[0];
         }
+        FieldInfo[] fieldInfos = cache.get(clazz);
+        if (fieldInfos != null){
+            return fieldInfos;
+        }
+        Field[] fields = clazz.getDeclaredFields();
         FieldInfo[] result = new FieldInfo[fields.length];
         int index = 0;
         for (Field field : fields){

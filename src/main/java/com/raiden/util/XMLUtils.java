@@ -5,6 +5,7 @@ import com.raiden.annotation.XMLNode;
 import com.raiden.content.DataFormatStrategyContext;
 import com.raiden.core.FieldInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Branch;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -27,8 +28,6 @@ import java.util.Collection;
  */
 public final class XMLUtils {
 
-    private static final String MESSAGE = "MESSAGE";
-
     /**
      * 将Java对象序列化成XML格式
      * @param bean
@@ -40,9 +39,7 @@ public final class XMLUtils {
         }
         File file = new File(path);
         Document doc = DocumentHelper.createDocument();
-        //添加根节点
-        Element message = doc.addElement(MESSAGE);
-        serialize(message, bean);
+        serialize(doc, bean);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
             OutputFormat format = OutputFormat.createPrettyPrint();
             XMLWriter writer = new XMLWriter(fileOutputStream, format);
@@ -53,19 +50,18 @@ public final class XMLUtils {
         }
     }
 
-    private static void serialize(Element message,Object bean){
-        if (bean == null){
+    private static void serialize(Branch branch, Object bean){
+        Class<?> clazz = bean.getClass();
+        XMLNode rootNode = clazz.getAnnotation(XMLNode.class);
+        if (rootNode == null){
             return;
         }
-        Class<?> clazz = bean.getClass();
-        XMLNode annotation = clazz.getAnnotation(XMLNode.class);
-        Element element = message.addElement(annotation.nameOfTheNod());
-        XMLAttribute[] xmlAttributes = annotation.attributes();
+        Element element = branch.addElement(rootNode.nameOfTheNod());
+        XMLAttribute[] xmlAttributes = rootNode.attributes();
         for(XMLAttribute xmlAttribute : xmlAttributes){
             element.addAttribute(xmlAttribute.key(), xmlAttribute.value());
         }
-        Field[] declaredFields = clazz.getDeclaredFields();
-        FieldInfo[] fieldInfos = FieldInfoUtils.builder(declaredFields);
+        FieldInfo[] fieldInfos = FieldInfoUtils.builder(clazz);
         for (FieldInfo info : fieldInfos){
             if (info == null){
                 continue;
@@ -73,9 +69,8 @@ public final class XMLUtils {
             Class<?> type = info.getType();
             XMLNode xmlNode = info.getXmlNode();
             XMLAttribute[] attributes = xmlNode.attributes();
-            XMLNode node = type.getAnnotation(XMLNode.class);
             //判断是不是基础数据类型
-            if (node != null){
+            if (xmlNode != null){
                 Method getFieldValue = info.getGetFieldValue();
                 try {
                     Object invoke = getFieldValue.invoke(bean);
@@ -93,11 +88,7 @@ public final class XMLUtils {
                         if (o == null){
                             continue;
                         }
-                        Class<?> aClass = o.getClass();
-                        XMLNode xmlNode1 = aClass.getAnnotation(XMLNode.class);
-                        if (xmlNode1 != null){
-                            serialize(item, o);
-                        }
+                        serialize(item, o);
                     }
                 } catch (Exception e) {
                     continue;
@@ -109,13 +100,10 @@ public final class XMLUtils {
                     Element item = element.addElement(xmlNode.nameOfTheNod());
                     Object[] array = (Object[]) getFieldValue.invoke(bean);
                     for (Object o : array){
-                        if (o != null){
-                            Class<?> aClass = o.getClass();
-                            XMLNode xmlNode1 = aClass.getAnnotation(XMLNode.class);
-                            if (xmlNode1 != null){
-                                serialize(item, o);
-                            }
+                        if (o == null){
+                            continue;
                         }
+                        serialize(item, o);
                     }
                 } catch (Exception e) {
                     continue;

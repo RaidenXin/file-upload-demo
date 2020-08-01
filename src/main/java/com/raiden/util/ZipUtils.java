@@ -21,7 +21,7 @@ public final class ZipUtils {
      * @throws IOException
      */
     public static void writeZip(List<File> files, String zipname) throws IOException {
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(zipname + ".zip"));
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(zipname));
         ZipOutputStream zos = new ZipOutputStream(os);
         byte[] buf = new byte[1024];
         int len;
