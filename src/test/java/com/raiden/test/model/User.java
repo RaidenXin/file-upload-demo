@@ -1,4 +1,4 @@
-package com.raiden.model;
+package com.raiden.test.model;
 
 import com.raiden.annotation.XMLAttribute;
 import com.raiden.annotation.XMLNode;

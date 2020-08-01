@@ -39,14 +39,7 @@ public final class LocalDateUtils {
 
     private static final String ZERO = "0";
 
-    private static final Map<String, Function<String, String>> FUNCTION_CACHE;
-
-    public static final String GET_TIME = "getTime";
-
-    static {
-        FUNCTION_CACHE = new HashMap<>();
-        FUNCTION_CACHE.put(GET_TIME, LocalDateUtils::getTime);
-    }
+    public static final String GET_TIME = "LocalDateUtils.getTime";
 
     private LocalDateUtils() {
     }
@@ -82,49 +75,6 @@ public final class LocalDateUtils {
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         return localDateTime;
-    }
-
-
-    /**
-     * 判断当前时间是否在2个日期之间，如果某个日期为空，则表示不做限制
-     *
-     * @param beginDate
-     * @param endDate
-     * @return
-     */
-    public static boolean isValid(String beginDate, String endDate) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime begin = parseLocalDateTime(beginDate);
-        if (begin != null && begin.isAfter(now)) {
-            return false;
-        }
-        LocalDateTime end = parseLocalDateTime(endDate);
-        if (end != null && end.isBefore(now)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 判断当前时间是否在2个日期之间，不包含时间
-     * @param beginDate
-     * @param endDate
-     * @return
-     */
-    public static boolean checkDate(String currDate,String beginDate, String endDate) {
-        LocalDate now = parseLocalDate(currDate);
-        if(now == null){
-            return false;
-        }
-        LocalDate begin = parseLocalDate(beginDate);
-        if (begin != null && begin.isAfter(now)) {
-            return false;
-        }
-        LocalDate end = parseLocalDate(endDate);
-        if (end != null && end.isBefore(now)) {
-            return false;
-        }
-        return true;
     }
 
     public static boolean isValid(String endDate) {
@@ -200,13 +150,5 @@ public final class LocalDateUtils {
             return ZERO;
         }
         return Long.toString(time.getTime() / 1000L);
-    }
-
-    public static String executeFunction(String functionName,String args){
-        Function<String, String> function = FUNCTION_CACHE.get(functionName);
-        if (function == null){
-            return null;
-        }
-        return function.apply(args);
     }
 }

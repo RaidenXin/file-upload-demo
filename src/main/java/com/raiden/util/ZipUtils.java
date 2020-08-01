@@ -14,6 +14,12 @@ import java.util.zip.ZipOutputStream;
 public final class ZipUtils {
 
 
+    /**
+     * 将所有文件写入压缩包
+     * @param files
+     * @param zipname
+     * @throws IOException
+     */
     public static void writeZip(List<File> files, String zipname) throws IOException {
         OutputStream os = new BufferedOutputStream(new FileOutputStream(zipname + ".zip"));
         ZipOutputStream zos = new ZipOutputStream(os);

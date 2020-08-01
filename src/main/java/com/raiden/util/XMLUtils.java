@@ -2,6 +2,7 @@ package com.raiden.util;
 
 import com.raiden.annotation.XMLAttribute;
 import com.raiden.annotation.XMLNode;
+import com.raiden.content.DataFormatStrategyContext;
 import com.raiden.core.FieldInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -28,18 +29,16 @@ public final class XMLUtils {
 
     private static final String MESSAGE = "MESSAGE";
 
-    private static final String PATH = "user.xml";
-
     /**
      * 将Java对象序列化成XML格式
      * @param bean
      * @return
      */
-    public static File serializeToXML(Object bean) {
+    public static File toXMLFile(Object bean,String path) {
         if (bean == null) {
             return null;
         }
-        File file = new File(PATH);
+        File file = new File(path);
         Document doc = DocumentHelper.createDocument();
         //添加根节点
         Element message = doc.addElement(MESSAGE);
@@ -132,7 +131,7 @@ public final class XMLUtils {
                         String functionName;
                         //如果是时间类 且 格式化方法名称不为空 进行格式化
                         if (isBlank && info.isDataConversion() && StringUtils.isNotBlank(functionName = info.getFunctionName())){
-                            item.addAttribute(xmlAttribute.key(), LocalDateUtils.executeFunction(functionName, attributeValue));
+                            item.addAttribute(xmlAttribute.key(), DataFormatStrategyContext.executeFunction(functionName, attributeValue));
                         }else {
                             item.addAttribute(xmlAttribute.key(), attributeValue);
                         }
