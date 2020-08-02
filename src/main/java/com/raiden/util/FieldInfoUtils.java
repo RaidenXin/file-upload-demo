@@ -1,7 +1,9 @@
 package com.raiden.util;
 
+import com.raiden.annotation.XMLDeserialization;
 import com.raiden.annotation.XMLNode;
 import com.raiden.core.FieldInfo;
+import com.raiden.core.XMLBeanInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,17 +13,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class FieldInfoUtils {
 
-    private static final Map<Class<?>, FieldInfo[]> cache = new ConcurrentHashMap<>();
+    /**
+     * 这里设置了一个缓存
+     */
+    private static final Map<Class<?>, XMLBeanInfo> cache = new ConcurrentHashMap<>();
 
     private static final String GET = "get";
+    private static final String SET = "set";
 
-    public static FieldInfo[] builder(Class<?> clazz){
+    public static XMLBeanInfo builder(Class<?> clazz){
         if (clazz == null){
-            return new FieldInfo[0];
+            return new XMLBeanInfo();
         }
-        FieldInfo[] fieldInfos = cache.get(clazz);
-        if (fieldInfos != null){
-            return fieldInfos;
+        //从缓存中取出
+        XMLBeanInfo beanInfo = cache.get(clazz);
+        //如果缓存中存在 就直接返回
+        if (beanInfo != null){
+            return beanInfo;
         }
         Field[] fields = clazz.getDeclaredFields();
         FieldInfo[] result = new FieldInfo[fields.length];
@@ -31,13 +39,17 @@ public final class FieldInfoUtils {
             XMLNode annotation = field.getAnnotation(XMLNode.class);
             Class<?> declaringClass = field.getDeclaringClass();
             try {
-                Method method = declaringClass.getDeclaredMethod(GET + firstLetterCapitalized(field.getName()));
-                result[index++] = FieldInfo.builder(field, method, field.getType(), annotation, annotation.isDataConversion(), annotation.dateFormatFunction());
+                Method getFieldValue = declaringClass.getDeclaredMethod(GET + firstLetterCapitalized(field.getName()));
+                Method setFieldValue = declaringClass.getDeclaredMethod(SET + firstLetterCapitalized(field.getName()), field.getType());
+                result[index++] = FieldInfo.builder(field, getFieldValue, setFieldValue, annotation, annotation.serialization(), annotation.deserialization());
             } catch (NoSuchMethodException e) {
                 continue;
             }
         }
-        return result;
+        beanInfo = new XMLBeanInfo(result);
+        //放入缓存中
+        cache.put(clazz, beanInfo);
+        return beanInfo;
     }
 
     /**

@@ -15,19 +15,23 @@ import java.util.function.Function;
 public final class DataFormatStrategyContext {
 
 
-    private static final Map<String, Function<String, Object>> FUNCTION_CACHE;
+    private static final Map<String, Function<Object, Object>> FUNCTION_CACHE;
 
     static {
         FUNCTION_CACHE = new HashMap<>();
-        Function<String, Object> getTime = LocalDateUtils::getTime;
-        FUNCTION_CACHE.put(LocalDateUtils.GET_TIME, getTime);
+        FUNCTION_CACHE.put(LocalDateUtils.GET_TIME, LocalDateUtils::getTime);
+        FUNCTION_CACHE.put(LocalDateUtils.FORMAT, LocalDateUtils::format);
     }
 
-    public static <T> T executeFunction(String functionName,String args){
-        Function<String, Object> function = FUNCTION_CACHE.get(functionName);
-        if (function == null){
-            return null;
+    public static <T> T executeFunctions(String[] functionNames,Object args){
+        Object result = args;
+        for (String functionName : functionNames){
+            Function<Object, Object> function = FUNCTION_CACHE.get(functionName);
+            if (function == null){
+                continue;
+            }
+            result = function.apply(result);
         }
-        return (T) function.apply(args);
+        return (T) result;
     }
 }

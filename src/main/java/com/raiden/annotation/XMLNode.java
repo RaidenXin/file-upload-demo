@@ -14,14 +14,14 @@ public @interface XMLNode {
      */
     String nameOfTheNod();
     /**
-     * 是否进行数据转换
+     * 序列化转
      * @return
      */
-    boolean isDataConversion() default false;
+    XMLSerialization serialization() default @XMLSerialization;
     /**
-     * 数据格式转换方法
+     * 反序列化
      */
-    String dateFormatFunction() default "";
+    XMLDeserialization deserialization() default @XMLDeserialization;
     /**
      * 字段属性
      * @return
