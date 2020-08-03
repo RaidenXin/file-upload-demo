@@ -1,10 +1,7 @@
 package com.raiden.test.model;
 
-import com.raiden.annotation.XMLAttribute;
-import com.raiden.annotation.XMLDeserialization;
-import com.raiden.annotation.XMLNode;
-import com.raiden.annotation.XMLSerialization;
-import com.raiden.util.LocalDateUtils;
+import com.raiden.core.annotation.XMLAttribute;
+import com.raiden.core.annotation.XMLNode;
 import lombok.Getter;
 import lombok.Setter;
 

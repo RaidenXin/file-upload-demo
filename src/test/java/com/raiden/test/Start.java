@@ -3,19 +3,12 @@ package com.raiden.test;
 import com.raiden.test.model.Message;
 import com.raiden.test.model.ReportFormInfo;
 import com.raiden.test.model.User;
-import com.raiden.util.XMLUtils;
-import com.raiden.util.ZipUtils;
-import com.sun.xml.internal.ws.util.xml.XmlUtil;
+import com.raiden.core.util.XMLUtils;
+import com.raiden.core.util.ZipUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * @创建人:Raiden
