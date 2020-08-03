@@ -1,6 +1,4 @@
-package com.raiden.annotation;
-
-import com.raiden.util.LocalDateUtils;
+package com.raiden.core.annotation;
 
 import java.lang.annotation.*;
 

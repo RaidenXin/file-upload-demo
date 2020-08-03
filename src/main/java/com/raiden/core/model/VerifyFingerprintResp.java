@@ -1,6 +1,5 @@
 package com.raiden.core.model;
 
-import com.raiden.annotation.XMLAttribute;
 import lombok.Getter;
 import lombok.Setter;
 

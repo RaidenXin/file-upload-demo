@@ -1,8 +1,8 @@
 package com.raiden.core;
 
-import com.raiden.annotation.XMLDeserialization;
-import com.raiden.annotation.XMLNode;
-import com.raiden.annotation.XMLSerialization;
+import com.raiden.core.annotation.XMLDeserialization;
+import com.raiden.core.annotation.XMLNode;
+import com.raiden.core.annotation.XMLSerialization;
 import lombok.Getter;
 import lombok.Setter;
 

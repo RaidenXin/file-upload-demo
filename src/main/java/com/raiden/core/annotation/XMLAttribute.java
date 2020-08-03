@@ -1,4 +1,4 @@
-package com.raiden.annotation;
+package com.raiden.core.annotation;
 
 import java.lang.annotation.*;
 

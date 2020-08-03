@@ -1,12 +1,12 @@
-package com.raiden.annotation;
+package com.raiden.core.annotation;
 
 /**
  * @创建人:Raiden
  * @Descriotion:
- * @Date:Created in 16:41 2020/8/2
+ * @Date:Created in 16:42 2020/8/2
  * @Modified By:
  */
-public @interface XMLSerialization {
+public @interface XMLDeserialization {
     /**
      * 是否进行数据转换
      * @return

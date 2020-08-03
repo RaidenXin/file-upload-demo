@@ -1,13 +1,11 @@
-package com.raiden.util;
+package com.raiden.core.util;
 
-import com.raiden.annotation.XMLDeserialization;
-import com.raiden.annotation.XMLNode;
+import com.raiden.core.annotation.XMLNode;
 import com.raiden.core.FieldInfo;
 import com.raiden.core.XMLBeanInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

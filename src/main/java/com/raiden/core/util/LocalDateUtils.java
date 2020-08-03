@@ -1,4 +1,4 @@
-package com.raiden.util;
+package com.raiden.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;

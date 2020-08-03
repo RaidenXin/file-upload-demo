@@ -1,8 +1,8 @@
-package com.raiden.util;
+package com.raiden.core.util;
 
-import com.raiden.annotation.XMLAttribute;
-import com.raiden.annotation.XMLNode;
-import com.raiden.content.DataFormatStrategyContext;
+import com.raiden.core.annotation.XMLAttribute;
+import com.raiden.core.annotation.XMLNode;
+import com.raiden.core.content.DataFormatStrategyContext;
 import com.raiden.core.FieldInfo;
 import com.raiden.core.XMLBeanInfo;
 import com.raiden.core.model.VerifyFingerprintResp;
@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 
 /**

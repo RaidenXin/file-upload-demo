@@ -1,4 +1,4 @@
-package com.raiden.util;
+package com.raiden.core.util;
 
 import java.io.*;
 import java.util.List;

@@ -1,6 +1,6 @@
-package com.raiden.content;
+package com.raiden.core.content;
 
-import com.raiden.util.LocalDateUtils;
+import com.raiden.core.util.LocalDateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
