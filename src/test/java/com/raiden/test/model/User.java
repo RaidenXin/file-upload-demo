@@ -1,7 +1,9 @@
-package com.raiden.model;
+package com.raiden.test.model;
 
 import com.raiden.annotation.XMLAttribute;
+import com.raiden.annotation.XMLDeserialization;
 import com.raiden.annotation.XMLNode;
+import com.raiden.annotation.XMLSerialization;
 import com.raiden.util.LocalDateUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,33 +18,44 @@ import lombok.Setter;
 @Getter
 @XMLNode(nameOfTheNod = "DATA")
 public class User {
-    @XMLNode(nameOfTheNod = "ITEM2",
+    @XMLNode(nameOfTheNod = "ITEM",
             attributes = {
             @XMLAttribute(key = "key", value = "ID"),
             @XMLAttribute(key = "val"),
             @XMLAttribute(key = "rmk", value = "帐号")
     })
     private String id;
-    @XMLNode(nameOfTheNod = "ITEM3",
+    @XMLNode(nameOfTheNod = "ITEM",
             attributes = {
             @XMLAttribute(key = "key", value = "NAME"),
             @XMLAttribute(key = "val"),
             @XMLAttribute(key = "rmk", value = "联系人")
     })
     private String name;
-    @XMLNode(nameOfTheNod = "ITEM4",
+    @XMLNode(nameOfTheNod = "ITEM",
             attributes = {
             @XMLAttribute(key = "key", value = "STUDENT"),
             @XMLAttribute(key = "val"),
             @XMLAttribute(key = "rmk", value = "班级")
     })
     private String student;
-    @XMLNode(nameOfTheNod = "ITEM5",isDataConversion = true,
-            dateFormatFunction = LocalDateUtils.GET_TIME,
+    @XMLNode(nameOfTheNod = "ITEM",
+//            serialization = @XMLSerialization(isDataConversion = true, dateFormatFunctions = LocalDateUtils.GET_TIME),
+//            deserialization = @XMLDeserialization(isDataConversion = true, dateFormatFunctions = LocalDateUtils.FORMAT),
             attributes = {
             @XMLAttribute(key = "key", value = "BIRTHDAY"),
             @XMLAttribute(key = "val"),
             @XMLAttribute(key = "rmk", value = "生日")
     })
     private String dateOfBirth;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", student='" + student + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
+                '}';
+    }
 }

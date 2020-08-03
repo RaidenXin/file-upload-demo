@@ -31,12 +31,14 @@ public final class LocalDateUtils {
             "yyyy-MM-dd'T'HH:mm",
             "yyyy-MM-dd HH:mm:ss.SSS",
             "yyyy.MM.dd",
-            "yyyy年MM月dd日"
+            "yyyy年MM月dd日",
+            "yyyy年MM月dd日 h点:m分:s秒"
     };
 
     private static final String ZERO = "0";
 
     public static final String GET_TIME = "LocalDateUtils.getTime";
+    public static final String FORMAT = "LocalDateUtils.format";
 
     private LocalDateUtils() {
     }
@@ -72,54 +74,6 @@ public final class LocalDateUtils {
         }
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         return localDateTime;
-    }
-
-
-    /**
-     * 判断当前时间是否在2个日期之间，如果某个日期为空，则表示不做限制
-     *
-     * @param beginDate
-     * @param endDate
-     * @return
-     */
-    public static boolean isValid(String beginDate, String endDate) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime begin = parseLocalDateTime(beginDate);
-        if (begin != null && begin.isAfter(now)) {
-            return false;
-        }
-        LocalDateTime end = parseLocalDateTime(endDate);
-        if (end != null && end.isBefore(now)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 判断当前时间是否在2个日期之间，不包含时间
-     * @param beginDate
-     * @param endDate
-     * @return
-     */
-    public static boolean checkDate(String currDate,String beginDate, String endDate) {
-        LocalDate now = parseLocalDate(currDate);
-        if(now == null){
-            return false;
-        }
-        LocalDate begin = parseLocalDate(beginDate);
-        if (begin != null && begin.isAfter(now)) {
-            return false;
-        }
-        LocalDate end = parseLocalDate(endDate);
-        if (end != null && end.isBefore(now)) {
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isValid(String endDate) {
-        LocalDateTime localEndDate = parseLocalDateTime(endDate);
-        return localEndDate == null || localEndDate.compareTo(LocalDateTime.now()) >= 0;
     }
 
     public static LocalDate parseLocalDate(String date) {
@@ -181,14 +135,35 @@ public final class LocalDateUtils {
         return time.format(df);
     }
 
-    public static String getTime(String date){
-        if (StringUtils.isBlank((String)date)){
+    public static String getTime(Object date){
+        if (date instanceof String){
+            Date time = parseDate((String) date);
+            if (time == null){
+                return ZERO;
+            }
+            return Long.toString(time.getTime() / 1000L);
+        }else {
             return ZERO;
         }
-        Date time = parseDate((String) date);
-        if (time == null){
-            return ZERO;
+    }
+
+    public static String format(Object timeStamp){
+        if (timeStamp instanceof String){
+            String date = (String) timeStamp;
+            long l;
+            if (date.length() == 10){
+                l = Long.parseLong(date) * 1000;
+            }else {
+                l = Long.parseLong(date);
+            }
+            Date time = new Date(l);
+            if (time == null){
+                return "1970年1月1日";
+            }
+            SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
+            return format.format(time);
+        }else {
+            return "1970年1月1日";
         }
-        return Long.toString(time.getTime() / 1000L);
     }
 }
