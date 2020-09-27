@@ -1,11 +1,13 @@
 package com.raiden.core.util;
 
-import com.raiden.core.annotation.XMLAttribute;
-import com.raiden.core.annotation.XMLNode;
-import com.raiden.core.content.DataFormatStrategyContext;
-import com.raiden.core.FieldInfo;
-import com.raiden.core.XMLBeanInfo;
-import com.raiden.core.model.VerifyFingerprintResp;
+import com.huazhu.deploycontrol.core.annotation.XMLAttribute;
+import com.huazhu.deploycontrol.core.annotation.XMLChildNode;
+import com.huazhu.deploycontrol.core.annotation.XMLNode;
+import com.huazhu.deploycontrol.core.content.DataFormatStrategyContext;
+import com.huazhu.deploycontrol.core.info.FieldInfo;
+import com.huazhu.deploycontrol.core.info.XMLBeanInfo;
+import com.huazhu.deploycontrol.core.model.VerifyFingerprintResp;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.*;
 import org.dom4j.io.OutputFormat;
@@ -14,10 +16,11 @@ import org.dom4j.io.XMLWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 
 
 /**
@@ -26,6 +29,7 @@ import java.util.List;
  * @Date:Created in 23:38 2020/7/30
  * @Modified By:
  */
+@Slf4j
 public final class XMLUtils {
 
     /**
@@ -33,11 +37,18 @@ public final class XMLUtils {
      * @param bean
      * @return
      */
-    public static File toXMLFile(Object bean,String path) {
+    public static File toXMLFile(Object bean,String path,String fileName) {
         if (bean == null) {
             return null;
         }
-        File file = new File(path);
+        if (StringUtils.isAnyBlank(path, fileName)){
+            return null;
+        }
+        File paperFile = new File(path);
+        if (!paperFile.exists()){
+            paperFile.mkdirs();
+        }
+        File file = new File(path + fileName);
         Document doc = DocumentHelper.createDocument();
         serialize(doc, bean);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
@@ -89,8 +100,16 @@ public final class XMLUtils {
                 Method getFieldValue = info.getGetFieldValue();
                 //如果他是List 进行特殊操作
                 try {
-                    Element item = element.addElement(xmlNode.nameOfTheNod());
                     Collection<?> list =  (Collection<?>) getFieldValue.invoke(bean);
+                    if (list == null){
+                        continue;
+                    }
+                    Element item = element.addElement(xmlNode.nameOfTheNod());
+                    for (XMLAttribute attribute : attributes){
+                        if (attribute != null){
+                            item.addAttribute(attribute.key(), attribute.value());
+                        }
+                    }
                     for (Object o : list){
                         if (o == null){
                             continue;
@@ -104,8 +123,17 @@ public final class XMLUtils {
                 Method getFieldValue = info.getGetFieldValue();
                 //如果他是List 进行特殊操作
                 try {
-                    Element item = element.addElement(xmlNode.nameOfTheNod());
                     Object[] array = (Object[]) getFieldValue.invoke(bean);
+                    if (array == null){
+                        continue;
+                    }
+                    Element item = element.addElement(xmlNode.nameOfTheNod());
+                    for (XMLAttribute attribute : attributes){
+                        if (attribute == null){
+                            continue;
+                        }
+                        item.addAttribute(attribute.key(), attribute.value());
+                    }
                     for (Object o : array){
                         if (o == null){
                             continue;
@@ -115,24 +143,56 @@ public final class XMLUtils {
                 } catch (Exception e) {
                     continue;
                 }
-            }else {
-                Element item = element.addElement(xmlNode.nameOfTheNod());
-                for(XMLAttribute xmlAttribute : attributes){
-                    String value = xmlAttribute.value();
+            }else if (Map.class.isAssignableFrom(type)){
+                //如果 是一个Map
+                try {
                     Method getFieldValue = info.getGetFieldValue();
-                    try {
-                        boolean isBlank = StringUtils.isBlank(value);
-                        String attributeValue = isBlank? String.valueOf(getFieldValue.invoke(bean)) : value;
-                        String[] functionNames;
-                        //需要进行格式化 且 格式化方法名称不为空 进行格式化
-                        if (isBlank && info.isDataConversionOfSerialization() && (functionNames = info.getFunctionNamesOfSerialization()).length > 0){
-                            item.addAttribute(xmlAttribute.key(), DataFormatStrategyContext.executeFunctions(functionNames, attributeValue));
-                        }else {
-                            item.addAttribute(xmlAttribute.key(), attributeValue);
-                        }
-                    } catch (Exception e) {
+                    Map<Object, Object> map = (Map<Object, Object>) getFieldValue.invoke(bean);
+                    if (map == null){
                         continue;
                     }
+                    XMLChildNode childNode = xmlNode.childNode();
+                    for (Map.Entry<Object, Object> entry : map.entrySet()){
+                        Element item = element.addElement(xmlNode.nameOfTheNod());
+                        String key = String.valueOf(entry.getKey());
+                        Object o = entry.getValue();
+                        if (o != null){
+                            Element em = item.addElement(childNode.nameOfTheNod());
+                            String attributeKey = childNode.key();
+                            em.addAttribute(attributeKey, key);
+                            Class<?> c = o.getClass();
+                            if (c.isAnnotationPresent(XMLNode.class)){
+                                serialize(em, c);
+                            }else {
+                                //设置value
+                                em.addAttribute(childNode.value(), String.valueOf(o));
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    continue;
+                }
+            }else {
+                try {
+                    Method getFieldValue = info.getGetFieldValue();
+                    Object invoke = getFieldValue.invoke(bean);
+                    if (invoke == null){
+                        continue;
+                    }
+                    Element item = element.addElement(xmlNode.nameOfTheNod());
+                    for (XMLAttribute xmlAttribute : attributes) {
+                        String value = xmlAttribute.value();
+                        boolean isBlank = StringUtils.isBlank(value);
+                        String attributeValue = isBlank ? String.valueOf(invoke) : value;
+                        String[] functionNames;
+                        //需要进行格式化 且 格式化方法名称不为空 进行格式化
+                        if (isBlank && info.isDataConversionOfSerialization() && (functionNames = info.getFunctionNamesOfSerialization()).length > 0) {
+                            item.addAttribute(xmlAttribute.key(), DataFormatStrategyContext.executeFunctions(functionNames, attributeValue));
+                        } else {
+                            item.addAttribute(xmlAttribute.key(), attributeValue);
+                        }
+                    }
+                } catch (Exception e) {
                 }
             }
         }
@@ -146,6 +206,7 @@ public final class XMLUtils {
         try {
             document = DocumentHelper.parseText(xml);
         } catch (DocumentException e) {
+            log.error("XML解析错误", e);
             return null;
         }
         Element rootElement = document.getRootElement();
@@ -184,6 +245,9 @@ public final class XMLUtils {
                 if (annotation != null){
                     //如果是一个带注解的实例类
                     for (Element e : elements){
+                        if (!verifyFingerprint(node, e).isSuccess()){
+                            continue;
+                        }
                         if ((args = deserialize(e, infoType)) != null){
                             deleteElement = e;
                             break;
@@ -198,8 +262,10 @@ public final class XMLUtils {
                     }
                     boolean isSuccess = false;
                     for (Element e : elements){
-                        List<Element> elementList = e.elements();
-                        for (Element el : elementList){
+                        if (!verifyFingerprint(node, e).isSuccess()){
+                            continue;
+                        }
+                        for (Element el : (List<Element>) e.elements()){
                             Object value;
                             if ((value = deserialize(el, c)) == null){
                                 break;
@@ -221,17 +287,57 @@ public final class XMLUtils {
                     if (componentType == null){
                         continue;
                     }
+                    boolean success = false;
                     for (Element e : elements){
-                        List<Element> elementList = e.elements();
-                        for (Element el : elementList){
+                        if (!verifyFingerprint(node, e).isSuccess()){
+                            continue;
+                        }
+                        for (Element el : (List<Element>) e.elements()){
                             Object value;
                             if ((value = deserialize(el, componentType)) == null){
                                 break;
                             }
                             values.add(value);
+                            success = true;
+                        }
+                        if (success){
+                            deleteElement = e;
+                            break;
                         }
                     }
                     args = values.toArray();
+                }else if(Map.class.isAssignableFrom(infoType)) {
+                    Map<Object, Object> map = new HashMap<>();
+                    XMLChildNode xmlChildNodes = node.childNode();
+                    Field field = info.getField();
+                    ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                    Type[] actualTypeArguments = genericType.getActualTypeArguments();
+                    Class keyType = (Class) actualTypeArguments[0];
+                    Class valueType = (Class) actualTypeArguments[1];
+                    for (Element e : elements){
+                        if (!verifyFingerprint(node, e).isSuccess()){
+                            continue;
+                        }
+                        List<Element> elementList = e.elements();
+                        if (elementList.isEmpty() && keyType.isAnnotationPresent(XMLNode.class)){
+                            continue;
+                        }
+                        Element el = elementList.get(0);
+                        Attribute attributeKey = el.attribute(xmlChildNodes.key());
+                        String keyStr = attributeKey.getValue();
+                        Object key = valueProcessing(keyType, keyStr);
+                        Object value;
+                        if (valueType.isAnnotationPresent(XMLNode.class)){
+                            value = deserialize(el, valueType);
+                        }else {
+                            Attribute attributeValue = el.attribute(xmlChildNodes.value());
+                            String valueStr = attributeValue.getValue();
+                            value = valueProcessing(valueType, valueStr);
+                        }
+                        map.put(key, value);
+                        element.remove(e);
+                    }
+                    args = map;
                 }else {
                     //其余的是 基础属性 如 String int 等
                     for (Element e : elements){
@@ -240,25 +346,7 @@ public final class XMLUtils {
                             String value = info.isDataConversionOfDeserialization() ?
                                     DataFormatStrategyContext.executeFunctions(info.getFunctionNamesOfDeserialization(), resp.getValue()) : resp.getValue();
                             deleteElement = e;
-                            if (infoType == Long.class){
-                                args = Long.valueOf(value);
-                            }else if (infoType == long.class){
-                                args = Long.parseLong(value);
-                            }else if (infoType == Float.class){
-                                args = Float.valueOf(value);
-                            }else if (infoType == float.class){
-                                args = Float.parseFloat(value);
-                            }else if (infoType == Integer.class){
-                                args = Integer.valueOf(value);
-                            }else if (infoType == int.class){
-                                args = Integer.parseInt(value);
-                            }else if (infoType == Boolean.class){
-                                args = Boolean.valueOf(value);
-                            }else if (infoType == boolean.class){
-                                args = Boolean.parseBoolean(value);
-                            }else {
-                                args = value;
-                            }
+                            args = valueProcessing(infoType, value);
                         }
                     }
                 }
@@ -289,8 +377,7 @@ public final class XMLUtils {
         //这里是 节点的签名(即为 节点名称 和 属性key和value的全部信息)
         StringBuilder elementSign = new StringBuilder(element.getName());
         String temp = null;
-        XMLAttribute[] xmlAttributes = xmlNode.attributes();
-        for (XMLAttribute xmlAttribute : xmlAttributes){
+        for (XMLAttribute xmlAttribute : xmlNode.attributes()){
             String key = xmlAttribute.key();
             Attribute attribute = element.attribute(key);
             if (attribute == null){
@@ -300,12 +387,41 @@ public final class XMLUtils {
             beanSign.append(key);
             elementSign.append(key);
             if (StringUtils.isNotBlank(value)){
-                beanSign.append(value);
-                elementSign.append(attribute.getValue());
+                beanSign.append(value.trim());
+                String attributeValue = attribute.getValue();
+                elementSign.append(StringUtils.isNotBlank(attributeValue) ? attributeValue.trim() : StringUtils.EMPTY);
             }else {
                 temp = attribute.getValue();
             }
         }
         return VerifyFingerprintResp.build(beanSign.toString().equals(elementSign.toString()), temp);
+    }
+
+    /**
+     * 值处理，将String 转换为实际类型
+     * @return
+     */
+    private static Object valueProcessing(Class<?> vlaueType,String value){
+        Object args;
+        if (vlaueType == Long.class){
+            args = Long.valueOf(value);
+        }else if (vlaueType == long.class){
+            args = Long.parseLong(value);
+        }else if (vlaueType == Float.class){
+            args = Float.valueOf(value);
+        }else if (vlaueType == float.class){
+            args = Float.parseFloat(value);
+        }else if (vlaueType == Integer.class){
+            args = Integer.valueOf(value);
+        }else if (vlaueType == int.class){
+            args = Integer.parseInt(value);
+        }else if (vlaueType == Boolean.class){
+            args = Boolean.valueOf(value);
+        }else if (vlaueType == boolean.class){
+            args = Boolean.parseBoolean(value);
+        }else {
+            args = value;
+        }
+        return args;
     }
 }

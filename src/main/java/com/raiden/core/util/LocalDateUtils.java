@@ -5,7 +5,10 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -16,6 +19,7 @@ public final class LocalDateUtils {
 
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
     public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
 
     private static final String[] PARSE_PATTERNS = {
             "yyyy-MM-dd'T'HH:mm:ss",
@@ -145,6 +149,10 @@ public final class LocalDateUtils {
         }else {
             return ZERO;
         }
+    }
+
+    public static String getTimestampByMonth(){
+        return formatter.format(LocalDate.now());
     }
 
     public static String format(Object timeStamp){

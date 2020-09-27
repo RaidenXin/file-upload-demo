@@ -2,6 +2,7 @@ package com.raiden.test;
 
 import com.raiden.test.model.Message;
 import com.raiden.test.model.ReportFormInfo;
+import com.raiden.test.model.RequestInfo;
 import com.raiden.test.model.User;
 import com.raiden.core.util.XMLUtils;
 import com.raiden.core.util.ZipUtils;
@@ -18,8 +19,8 @@ import java.util.*;
  */
 public class Start {
 
-    private static final String ZIP_PATH = "C:\\Users\\Raiden\\Desktop\\message.zip";
-    private static final String PATH = "user.xml";
+    private static final String ZIP_PATH = "C:\\Users\\xinlei002\\Desktop\\message.zip";
+    private static final String PATH = "user%s.xml";
 
     public static Message getMessage(){
         Message message = new Message();
@@ -59,11 +60,18 @@ public class Start {
     }
     @Test
     public void test(){
-        File file = XMLUtils.toXMLFile(getMessage(), PATH);
+        long start = System.currentTimeMillis();
+        List<File> files = new ArrayList<>();
+        for (int i = 0;i < 1024; i ++){
+            File file = XMLUtils.toXMLFile(getMessage(), String.format(PATH, i));
+            files.add(file);
+        }
         try {
-            ZipUtils.writeZip(Arrays.asList(file), ZIP_PATH);
+            ZipUtils.writeZip(files, ZIP_PATH);
         } catch (Exception e) {
         }
+        long end = System.currentTimeMillis();
+        System.err.println("总耗时：" + (end - start));
     }
 
     @Test
@@ -84,7 +92,19 @@ public class Start {
 
     @Test
     public void test4() throws NoSuchFieldException {
-        System.out.println(new Date().getTime());
-        System.out.println(new Date().getTime() * 1000L);
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<MESSAGE>\n" +
+                "\t<DATASET name=\"WA_COMMON_010000\" rmk=\"消息通用信息\">\n" +
+                "\t\t<DATA>\n" +
+                "\t\t\t<ITEM key=\"APPTYPE\" val=\"xxx\" rmk=\"应用编码，字典码\"/>\n" +
+                "\t\t\t<ITEM key=\"OPCODE\" val=\"QUERYNODESTATUS\" rmk=\"业务类型\"/>\n" +
+                "\t\t\t<ITEM key=\"MSGID\" val=\"xxx\" rmk=\"消息流水号\"/>\n" +
+                "\t\t\t<ITEM key=\"MSGTYPE\" val=\"1\" rmk=\"消息类型，1 请求，2 应答，3 结果\"/>\n" +
+                "\t\t\t<ITEM key=\"OPID\" val=\"xxx\" rmk=\"业务编号 \"/>\n" +
+                "\t\t</DATA>\n" +
+                "\t</DATASET>\n" +
+                "</MESSAGE>\n";
+        RequestInfo info = XMLUtils.deserialize(xml, RequestInfo.class);
+        System.err.println(info);
     }
 }

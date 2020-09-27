@@ -1,8 +1,8 @@
 package com.raiden.core.util;
 
-import com.raiden.core.annotation.XMLNode;
-import com.raiden.core.FieldInfo;
-import com.raiden.core.XMLBeanInfo;
+import com.huazhu.deploycontrol.core.annotation.XMLNode;
+import com.huazhu.deploycontrol.core.info.FieldInfo;
+import com.huazhu.deploycontrol.core.info.XMLBeanInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
